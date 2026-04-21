@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Weekly Intel — Turkey AI Ecosystem</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#000;--card:#111;--card-hi:#171717;--border:#1e1e1e;
+  --text:#fff;--dim:#999;--muted:#555;
+  --red:#e30a17;--green:#34d399;--blue:#60a5fa;--amber:#fbbf24;--purple:#a78bfa;--cyan:#22d3ee;
+  --gap:10px;--r:16px;--rs:10px;
+  --mono:'JetBrains Mono',monospace;--sans:'Inter',system-ui,sans-serif;
+}
+html{font-size:14px;scroll-behavior:smooth}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased}
+
+.shell{max-width:1100px;margin:0 auto;padding:var(--gap)}
+
+/* Header */
+.hdr{display:flex;justify-content:space-between;align-items:center;padding:20px 4px 16px;margin-bottom:2px}
+.hdr-left{display:flex;align-items:center;gap:14px}
+.hdr h1{font-family:var(--mono);font-size:14px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase}
+.hdr .dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);flex-shrink:0}
+.hdr-right{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:1px}
+.back-link{font-family:var(--mono);font-size:11px;color:var(--blue);text-decoration:none;letter-spacing:0.5px}
+.back-link:hover{text-decoration:underline}
+
+/* Section */
+.section{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:24px;margin-bottom:var(--gap)}
+.section-title{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:16px;display:flex;align-items:center;gap:10px}
+.section-title .accent{color:var(--red)}
+
+/* Summary bullets */
+.summary-list{list-style:none;padding:0}
+.summary-list li{padding:10px 0;border-bottom:1px solid var(--border);font-size:13px;line-height:1.7;color:var(--dim)}
+.summary-list li:last-child{border-bottom:none}
+.summary-list .highlight{color:var(--text);font-weight:600}
+
+/* KPI row */
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--gap);margin-bottom:var(--gap)}
+.kpi{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:20px 18px;position:relative;overflow:hidden}
+.kpi-label{font-family:var(--mono);font-size:9px;letter-spacing:1.8px;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.kpi-value{font-family:var(--mono);font-size:30px;font-weight:800;line-height:1;letter-spacing:-1px}
+.kpi-sub{font-family:var(--mono);font-size:10px;color:var(--dim);margin-top:8px}
+.kpi-accent{position:absolute;top:0;left:0;right:0;height:2px}
+
+/* Table */
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{font-family:var(--mono);font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);text-align:left;padding:10px 12px;border-bottom:1px solid var(--border)}
+td{padding:10px 12px;border-bottom:1px solid var(--border);color:var(--dim);vertical-align:top}
+tr:hover td{color:var(--text);background:var(--card-hi)}
+.amount{font-family:var(--mono);color:var(--green);font-weight:600}
+.tag{font-family:var(--mono);font-size:10px;letter-spacing:0.8px;padding:3px 10px;border-radius:20px;border:1px solid var(--border);color:var(--dim);display:inline-block;margin:2px 2px}
+.tag-funding{border-color:var(--green);color:var(--green)}
+.tag-ecosystem{border-color:var(--blue);color:var(--blue)}
+.tag-product{border-color:var(--purple);color:var(--purple)}
+.tag-partnership{border-color:var(--amber);color:var(--amber)}
+.tag-education{border-color:var(--cyan);color:var(--cyan)}
+
+/* Watchlist */
+.watchlist-item{padding:14px 0;border-bottom:1px solid var(--border)}
+.watchlist-item:last-child{border-bottom:none}
+.watchlist-name{font-weight:600;color:var(--text);font-size:13px;margin-bottom:4px}
+.watchlist-reason{font-size:12px;color:var(--dim);line-height:1.6}
+
+/* Category grid */
+.cat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.cat-item{background:var(--card-hi);border-radius:var(--rs);padding:12px 14px;display:flex;justify-content:space-between;align-items:center}
+.cat-name{font-size:12px;color:var(--dim);text-transform:capitalize}
+.cat-count{font-family:var(--mono);font-size:18px;font-weight:700}
+
+/* Footer */
+.footer{text-align:center;padding:24px;font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:1px}
+.footer a{color:var(--blue);text-decoration:none}
+</style>
+</head>
+<body>
+<div class="shell">
+
+<!-- Header -->
+<div class="hdr">
+  <div class="hdr-left">
+    <div class="dot"></div>
+    <h1>Weekly Intel Briefing</h1>
+  </div>
+  <div class="hdr-right">
+    <a href="index.html" class="back-link">&larr; Dashboard</a>
+    &nbsp;&nbsp;Mar 23 &ndash; Mar 29, 2026
+  </div>
+</div>
+
+<!-- KPI Row -->
+<div class="kpi-row">
+  <div class="kpi">
+    <div class="kpi-accent" style="background:var(--blue)"></div>
+    <div class="kpi-label">News Scanned</div>
+    <div class="kpi-value">50</div>
+    <div class="kpi-sub">past 7 days</div>
+  </div>
+  <div class="kpi">
+    <div class="kpi-accent" style="background:var(--green)"></div>
+    <div class="kpi-label">Funding Mentions</div>
+    <div class="kpi-value">9</div>
+    <div class="kpi-sub">investment signals</div>
+  </div>
+  <div class="kpi">
+    <div class="kpi-accent" style="background:var(--purple)"></div>
+    <div class="kpi-label">New Startups</div>
+    <div class="kpi-value">11</div>
+    <div class="kpi-sub">discovered this week</div>
+  </div>
+  <div class="kpi">
+    <div class="kpi-accent" style="background:var(--red)"></div>
+    <div class="kpi-label">Total Tracked</div>
+    <div class="kpi-value">1,698</div>
+    <div class="kpi-sub">startups &middot; 1,261 investors</div>
+  </div>
+</div>
+
+<!-- Executive Summary -->
+<div class="section">
+  <div class="section-title"><span class="accent">//</span> Executive Summary</div>
+  <ul class="summary-list">
+    <li><span class="highlight">Global AI mega-rounds dominate headlines</span> &mdash; Shield AI ($2B), MatX ($500M from Jane Street), Mind Robotics ($500M), and AMI Labs (backed by NVIDIA, Bezos Expeditions, Temasek) highlight continued massive capital flows into AI infrastructure and robotics.</li>
+    <li><span class="highlight">Turkish ecosystem signals strengthening</span> &mdash; Daily Sabah reports $5.6B cumulative investment in the Turkish startup ecosystem. Power bottlenecks are creating new opportunities for AI data center investors in Turkey.</li>
+    <li><span class="highlight">Education-industry partnerships advancing</span> &mdash; Yandex and METU (ODTU) have launched a second cohort of their AI master's program, signaling deepening academic-corporate ties in Turkey's AI talent pipeline.</li>
+    <li><span class="highlight">KOSGEB funding active</span> &mdash; Turkey's SME development agency disbursed ~$2.3M through its financing program, the only confirmed domestic investment this week with a specific amount.</li>
+  </ul>
+</div>
+
+<!-- News Pulse -->
+<div class="section">
+  <div class="section-title"><span class="accent">//</span> News Pulse by Category</div>
+  <div class="cat-grid">
+    <div class="cat-item">
+      <span class="cat-name">Uncategorized</span>
+      <span class="cat-count" style="color:var(--dim)">34</span>
+    </div>
+    <div class="cat-item">
+      <span class="cat-name">Funding</span>
+      <span class="cat-count" style="color:var(--green)">9</span>
+    </div>
+    <div class="cat-item">
+      <span class="cat-name">Ecosystem</span>
+      <span class="cat-count" style="color:var(--blue)">4</span>
+    </div>
+    <div class="cat-item">
+      <span class="cat-name">Product</span>
+      <span class="cat-count" style="color:var(--purple)">1</span>
+    </div>
+    <div class="cat-item">
+      <span class="cat-name">Partnership</span>
+      <span class="cat-count" style="color:var(--amber)">1</span>
+    </div>
+    <div class="cat-item">
+      <span class="cat-name">Education</span>
+      <span class="cat-count" style="color:var(--cyan)">1</span>
+    </div>
+  </div>
+</div>
+
+<!-- Funding Activity -->
+<div class="section">
+  <div class="section-title"><span class="accent">//</span> Funding Activity</div>
+  <table>
+    <tr><th>Company</th><th>Round</th><th>Amount</th><th>Investor</th></tr>
+    <tr>
+      <td>H (via KOSGEB)</td>
+      <td><span class="tag tag-funding">Grant</span></td>
+      <td class="amount">$2.3M</td>
+      <td>KOSGEB</td>
+    </tr>
+    <tr>
+      <td>Shield AI</td>
+      <td><span class="tag tag-funding">Late Stage</span></td>
+      <td class="amount">$2.0B</td>
+      <td>Undisclosed</td>
+    </tr>
+    <tr>
+      <td>MatX</td>
+      <td><span class="tag tag-funding">Series B</span></td>
+      <td class="amount">$500M</td>
+      <td>Jane Street, Situational Awareness</td>
+    </tr>
+    <tr>
+      <td>Mind Robotics</td>
+      <td><span class="tag tag-funding">Series A</span></td>
+      <td class="amount">$500M</td>
+      <td>Accel</td>
+    </tr>
+    <tr>
+      <td>AMI Labs</td>
+      <td><span class="tag tag-funding">N/A</span></td>
+      <td class="amount">&mdash;</td>
+      <td>Bezos Expeditions, NVIDIA, Temasek, Toyota Ventures</td>
+    </tr>
+    <tr>
+      <td>eMed</td>
+      <td><span class="tag tag-funding">N/A</span></td>
+      <td class="amount">$200M</td>
+      <td>Undisclosed</td>
+    </tr>
+    <tr>
+      <td>Kudwa</td>
+      <td><span class="tag tag-funding">N/A</span></td>
+      <td class="amount">$1.1M</td>
+      <td>Venture Capital</td>
+    </tr>
+    <tr>
+      <td>Cogent Security</td>
+      <td><span class="tag tag-funding">N/A</span></td>
+      <td class="amount">&mdash;</td>
+      <td>Greylock Partners, Lockstep</td>
+    </tr>
+  </table>
+</div>
+
+<!-- Key Headlines -->
+<div class="section">
+  <div class="section-title"><span class="accent">//</span> Key Headlines</div>
+  <table>
+    <tr><th>Headline</th><th>Source</th><th>Category</th></tr>
+    <tr>
+      <td>Turkish Startup Ecosystem Attracts $5.6 Billion in Investments</td>
+      <td>Daily Sabah</td>
+      <td><span class="tag tag-funding">funding</span></td>
+    </tr>
+    <tr>
+      <td>Power Bottleneck Creates Opportunity for Investors in Turkish AI Data Centers</td>
+      <td>Daily Sabah</td>
+      <td><span class="tag tag-ecosystem">ecosystem</span></td>
+    </tr>
+    <tr>
+      <td>Webrazzi AI 2026: Turkey's Most Comprehensive AI Summit</td>
+      <td>Webrazzi</td>
+      <td><span class="tag tag-ecosystem">ecosystem</span></td>
+    </tr>
+    <tr>
+      <td>Yandex &amp; METU AI Master's Program Launches Second Cohort</td>
+      <td>Webrazzi</td>
+      <td><span class="tag tag-education">education</span></td>
+    </tr>
+    <tr>
+      <td>Yandex-ODTU AI Graduate Program 2026 Applications</td>
+      <td>Hurriyet/Dunya</td>
+      <td><span class="tag tag-partnership">partnership</span></td>
+    </tr>
+    <tr>
+      <td>World Bank Report: Top 40 AI Tools Identified</td>
+      <td>Bloomberg HT</td>
+      <td><span class="tag tag-product">product</span></td>
+    </tr>
+    <tr>
+      <td>Google's AI Futures Fund and Atoms Select AI Startups for 2026</td>
+      <td>General</td>
+      <td><span class="tag tag-ecosystem">ecosystem</span></td>
+    </tr>
+    <tr>
+      <td>5G Rollout to Accelerate Turkey's Digital Transformation</td>
+      <td>Webrazzi</td>
+      <td><span class="tag tag-ecosystem">ecosystem</span></td>
+    </tr>
+  </table>
+</div>
+
+<!-- New Entrants -->
+<div class="section">
+  <div class="section-title"><span class="accent">//</span> New Entrants Discovered</div>
+  <table>
+    <tr><th>Company</th><th>City</th><th>Category</th><th>AI Proximity</th></tr>
+    <tr>
+      <td>Rook AI</td>
+      <td>Istanbul</td>
+      <td>Services / Marketing &amp; AdTech</td>
+      <td><span class="amount">100%</span></td>
+    </tr>
+    <tr>
+      <td>Isbir Sentetik Dokuma Sanayi A.S.</td>
+      <td>Ankara</td>
+      <td>Health / Healthtech</td>
+      <td>80%</td>
+    </tr>
+    <tr>
+      <td>Isbir Sunger Sanayi A.S.</td>
+      <td>Ankara</td>
+      <td>Health / Healthtech</td>
+      <td>80%</td>
+    </tr>
+    <tr>
+      <td>Pear Therapeutics</td>
+      <td>&mdash;</td>
+      <td>Health / Healthtech</td>
+      <td>&mdash;</td>
+    </tr>
+  </table>
+  <p style="font-size:11px;color:var(--muted);margin-top:12px;font-family:var(--mono)">
+    + 5 portfolio companies discovered from Situational Awareness (BE, CRWV, INTC calls, LITE, CRWV calls) &mdash; pending verification
+  </p>
+</div>
+
+<!-- Watchlist -->
+<div class="section">
+  <div class="section-title"><span class="accent">//</span> Watchlist</div>
+  <div class="watchlist-item">
+    <div class="watchlist-name">Turkey AI Data Center Investment</div>
+    <div class="watchlist-reason">Daily Sabah reports that power infrastructure bottlenecks are creating new investment opportunities. Monitor for announcements from hyperscalers and sovereign wealth funds entering the Turkish market.</div>
+  </div>
+  <div class="watchlist-item">
+    <div class="watchlist-name">Yandex-METU AI Program</div>
+    <div class="watchlist-reason">Second cohort launching signals sustainable academic-industry pipeline. Track graduate placement and potential spin-off activity.</div>
+  </div>
+  <div class="watchlist-item">
+    <div class="watchlist-name">KOSGEB Financing Program</div>
+    <div class="watchlist-reason">Active disbursement of $2.3M this week. Government support channel for SMEs adopting AI. Monitor for new batches and expanded eligibility.</div>
+  </div>
+  <div class="watchlist-item">
+    <div class="watchlist-name">Webrazzi AI 2026 Conference</div>
+    <div class="watchlist-reason">Turkey's largest AI summit. Watch for partnership announcements, new startup showcases, and policy signals from the event.</div>
+  </div>
+  <div class="watchlist-item">
+    <div class="watchlist-name">Global AI Capital Flow Impact</div>
+    <div class="watchlist-reason">Mega-rounds (Shield AI $2B, MatX $500M) indicate accelerating global AI arms race. Track whether any of this capital flows into Turkish operations or partnerships.</div>
+  </div>
+</div>
+
+<!-- Footer -->
+<div class="footer">
+  Generated Mar 29, 2026 &middot; <a href="index.html">Back to Dashboard</a> &middot; Turkey AI Ecosystem Tracker
+</div>
+
+</div>
+</body>
+</html>
