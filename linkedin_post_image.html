@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agent Architecture Diagram</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: #0a0e1a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 40px;
+  }
+
+  .card {
+    width: 1200px;
+    background: linear-gradient(145deg, #0f1729 0%, #111b33 100%);
+    border-radius: 24px;
+    padding: 56px 64px 48px;
+    border: 1px solid rgba(255,255,255,0.06);
+    box-shadow: 0 40px 80px rgba(0,0,0,0.5);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    top: -200px;
+    right: -200px;
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, rgba(59,130,246,0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .card::after {
+    content: '';
+    position: absolute;
+    bottom: -150px;
+    left: -100px;
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, rgba(139,92,246,0.06) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .header {
+    text-align: center;
+    margin-bottom: 44px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .header .label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: #3b82f6;
+    margin-bottom: 12px;
+  }
+
+  .header h1 {
+    font-size: 32px;
+    font-weight: 800;
+    color: #ffffff;
+    letter-spacing: -0.5px;
+    line-height: 1.2;
+  }
+
+  .header h1 span {
+    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .header .sub {
+    font-size: 14px;
+    color: rgba(255,255,255,0.4);
+    margin-top: 8px;
+    font-weight: 400;
+  }
+
+  /* Pipeline */
+  .pipeline {
+    display: flex;
+    align-items: stretch;
+    gap: 16px;
+    margin-bottom: 36px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .agent-card {
+    flex: 1;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 16px;
+    padding: 24px 20px;
+    position: relative;
+    transition: all 0.3s ease;
+  }
+
+  .agent-card:nth-child(1) { border-top: 3px solid #3b82f6; }
+  .agent-card:nth-child(2) { border-top: 3px solid #8b5cf6; }
+  .agent-card:nth-child(3) { border-top: 3px solid #10b981; }
+  .agent-card:nth-child(4) { border-top: 3px solid #f59e0b; }
+
+  .agent-num {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .agent-card:nth-child(1) .agent-num { color: #3b82f6; }
+  .agent-card:nth-child(2) .agent-num { color: #8b5cf6; }
+  .agent-card:nth-child(3) .agent-num { color: #10b981; }
+  .agent-card:nth-child(4) .agent-num { color: #f59e0b; }
+
+  .agent-name {
+    font-size: 17px;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 10px;
+    line-height: 1.3;
+  }
+
+  .agent-desc {
+    font-size: 12.5px;
+    color: rgba(255,255,255,0.45);
+    line-height: 1.6;
+  }
+
+  .agent-tags {
+    margin-top: 14px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+  }
+
+  .agent-tag {
+    font-size: 10px;
+    font-weight: 600;
+    padding: 3px 9px;
+    border-radius: 6px;
+    letter-spacing: 0.3px;
+  }
+
+  .agent-card:nth-child(1) .agent-tag { background: rgba(59,130,246,0.12); color: #60a5fa; }
+  .agent-card:nth-child(2) .agent-tag { background: rgba(139,92,246,0.12); color: #a78bfa; }
+  .agent-card:nth-child(3) .agent-tag { background: rgba(16,185,129,0.12); color: #34d399; }
+  .agent-card:nth-child(4) .agent-tag { background: rgba(245,158,11,0.12); color: #fbbf24; }
+
+  /* Arrow connectors between cards */
+  .arrow-connector {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 24px;
+  }
+
+  .arrow-connector svg {
+    width: 20px;
+    height: 20px;
+    opacity: 0.3;
+  }
+
+  /* Core layer */
+  .core-layer {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 14px;
+    padding: 22px 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .core-left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .core-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, rgba(59,130,246,0.15), rgba(139,92,246,0.15));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .core-icon svg {
+    width: 20px;
+    height: 20px;
+    color: #7c9cf5;
+  }
+
+  .core-label {
+    font-size: 13px;
+    font-weight: 700;
+    color: rgba(255,255,255,0.7);
+    letter-spacing: 0.5px;
+  }
+
+  .core-sub {
+    font-size: 11.5px;
+    color: rgba(255,255,255,0.3);
+    margin-top: 2px;
+  }
+
+  .core-features {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+
+  .core-feat {
+    font-size: 11px;
+    color: rgba(255,255,255,0.35);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .core-feat::before {
+    content: '';
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: rgba(124,156,245,0.5);
+    flex-shrink: 0;
+  }
+
+  /* Bottom row */
+  .bottom-row {
+    display: flex;
+    gap: 16px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .infra-card {
+    flex: 1;
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.05);
+    border-radius: 12px;
+    padding: 18px 22px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .infra-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 18px;
+  }
+
+  .infra-card:nth-child(1) .infra-icon { background: rgba(59,130,246,0.1); }
+  .infra-card:nth-child(2) .infra-icon { background: rgba(16,185,129,0.1); }
+  .infra-card:nth-child(3) .infra-icon { background: rgba(245,158,11,0.1); }
+
+  .infra-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: rgba(255,255,255,0.6);
+    margin-bottom: 2px;
+  }
+
+  .infra-detail {
+    font-size: 11px;
+    color: rgba(255,255,255,0.28);
+  }
+
+  /* Command line */
+  .command-bar {
+    margin-top: 28px;
+    background: rgba(0,0,0,0.25);
+    border: 1px solid rgba(255,255,255,0.05);
+    border-radius: 10px;
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .command-prompt {
+    font-size: 13px;
+    color: #10b981;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-weight: 600;
+  }
+
+  .command-text {
+    font-size: 13px;
+    color: rgba(255,255,255,0.5);
+    font-family: 'SF Mono', 'Fira Code', monospace;
+  }
+
+  .command-text span {
+    color: rgba(255,255,255,0.75);
+  }
+
+  .command-result {
+    margin-left: auto;
+    font-size: 11px;
+    color: rgba(16,185,129,0.6);
+    font-family: 'SF Mono', 'Fira Code', monospace;
+  }
+
+  /* Footer */
+  .footer {
+    margin-top: 28px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    z-index: 1;
+  }
+
+  .footer-left {
+    font-size: 11px;
+    color: rgba(255,255,255,0.18);
+    letter-spacing: 0.5px;
+  }
+
+  .footer-right {
+    font-size: 11px;
+    color: rgba(255,255,255,0.18);
+  }
+
+  .footer-right a {
+    color: rgba(59,130,246,0.5);
+    text-decoration: none;
+  }
+</style>
+</head>
+<body>
+
+<div class="card">
+
+  <div class="header">
+    <div class="label">Architecture Overview</div>
+    <h1>Local <span>Multi-Agent</span> Orchestration</h1>
+    <div class="sub">4 specialized agents running on a laptop — zero cloud, zero API cost</div>
+  </div>
+
+  <!-- Agent Pipeline -->
+  <div class="pipeline">
+    <div class="agent-card">
+      <div class="agent-num">Agent 01</div>
+      <div class="agent-name">News Scanner</div>
+      <div class="agent-desc">Scans news, blogs & media for startup mentions. Quality gates filter signal from noise before extraction.</div>
+      <div class="agent-tags">
+        <span class="agent-tag">Quality Gates</span>
+        <span class="agent-tag">Auto-Discovery</span>
+        <span class="agent-tag">NLP</span>
+      </div>
+    </div>
+
+    <div class="arrow-connector">
+      <svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+    </div>
+
+    <div class="agent-card">
+      <div class="agent-num">Agent 02</div>
+      <div class="agent-name">Updater</div>
+      <div class="agent-desc">Tiered refresh SLA — 7/14/30 day cycles. Delta enrichment keeps data current without wasting compute.</div>
+      <div class="agent-tags">
+        <span class="agent-tag">3-Pass Enrich</span>
+        <span class="agent-tag">Vitality Check</span>
+        <span class="agent-tag">Delta</span>
+      </div>
+    </div>
+
+    <div class="arrow-connector">
+      <svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+    </div>
+
+    <div class="agent-card">
+      <div class="agent-num">Agent 03</div>
+      <div class="agent-name">Ecosystem Scanner</div>
+      <div class="agent-desc">Maps corporates, teknoparks, accelerators & government — tracks partnerships, grants & programs.</div>
+      <div class="agent-tags">
+        <span class="agent-tag">Entity Graph</span>
+        <span class="agent-tag">Activity Log</span>
+        <span class="agent-tag">Fuzzy Match</span>
+      </div>
+    </div>
+
+    <div class="arrow-connector">
+      <svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+    </div>
+
+    <div class="agent-card">
+      <div class="agent-num">Agent 04</div>
+      <div class="agent-name">Investor Enrichment</div>
+      <div class="agent-desc">Builds investor profiles via 3-pass chains — search, scrape, structured extraction of deals & portfolios.</div>
+      <div class="agent-tags">
+        <span class="agent-tag">Deal Mapping</span>
+        <span class="agent-tag">Portfolio</span>
+        <span class="agent-tag">Scraping</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Core Layer -->
+  <div class="core-layer">
+    <div class="core-left">
+      <div class="core-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+      </div>
+      <div>
+        <div class="core-label">agent_core — Shared Intelligence Layer</div>
+        <div class="core-sub">All agents inherit from a common core with built-in resilience</div>
+      </div>
+    </div>
+    <div class="core-features">
+      <span class="core-feat">Search Rotation</span>
+      <span class="core-feat">LLM Routing</span>
+      <span class="core-feat">Fuzzy Matching</span>
+      <span class="core-feat">Async Batching</span>
+      <span class="core-feat">Disk Caching</span>
+      <span class="core-feat">Overflow Prevention</span>
+    </div>
+  </div>
+
+  <!-- Infrastructure Row -->
+  <div class="bottom-row">
+    <div class="infra-card">
+      <div class="infra-icon">🧠</div>
+      <div>
+        <div class="infra-title">Local LLM Inference</div>
+        <div class="infra-detail">MLX on Apple Silicon — Qwen 2.5 7B + Mistral Nemo</div>
+      </div>
+    </div>
+    <div class="infra-card">
+      <div class="infra-icon">🗄</div>
+      <div>
+        <div class="infra-title">SQLite + WAL Mode</div>
+        <div class="infra-detail">Single-file database — zero config, zero ops</div>
+      </div>
+    </div>
+    <div class="infra-card">
+      <div class="infra-icon">🌍</div>
+      <div>
+        <div class="infra-title">Region-Configurable</div>
+        <div class="infra-detail">Swap config to target any country or tech domain</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Command -->
+  <div class="command-bar">
+    <span class="command-prompt">$</span>
+    <span class="command-text">python3 main.py <span>--all</span></span>
+    <span class="command-result">scan → enrich → validate → dashboard → deploy</span>
+  </div>
+
+  <div class="footer">
+    <div class="footer-left">Built entirely on a MacBook — no cloud, no API costs, no infrastructure</div>
+    <div class="footer-right"><a href="https://aieco-dashboard.netlify.app">aieco-dashboard.netlify.app</a></div>
+  </div>
+
+</div>
+
+</body>
+</html>

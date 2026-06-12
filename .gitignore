@@ -1,0 +1,27 @@
+# ── Scrap / cache / data dumps (removed from the public repo) ──
+.cache/
+backups/
+logs/
+archive/
+reports/
+
+# ── Transient DB sidecar files (Master.db itself IS kept) ──
+*.db-wal
+*.db-shm
+Master.db-wal
+Master.db-shm
+
+# ── Python / OS / editor artifacts ──
+__pycache__/
+*.pyc
+*.pyo
+.DS_Store
+*.pre_guard
+*.bak
+.fuse_hidden*
+
+# ── Claude worktrees ──
+.claude/worktrees/
+
+# ── Unified tracker (kept local/private; dashboard is served via gh-pages) ──
+tracker_unified/

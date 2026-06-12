@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Turkey AI Ecosystem</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#000;--card:#111;--card-hi:#171717;--border:#1e1e1e;
+  --text:#fff;--dim:#999;--muted:#555;
+  --red:#e30a17;--green:#34d399;--blue:#60a5fa;--amber:#fbbf24;--purple:#a78bfa;--cyan:#22d3ee;
+  --gap:10px;--r:16px;--rs:10px;
+  --mono:'JetBrains Mono',monospace;--sans:'Inter',system-ui,sans-serif;
+}
+html{font-size:14px;scroll-behavior:smooth}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased}
+
+/* ── LAYOUT ─────────────────────────────────────── */
+.shell{max-width:1400px;margin:0 auto;padding:var(--gap)}
+
+/* Header */
+.hdr{display:flex;justify-content:space-between;align-items:center;padding:20px 4px 16px;margin-bottom:2px}
+.hdr-left{display:flex;align-items:center;gap:14px}
+.hdr h1{font-family:var(--mono);font-size:14px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase}
+.hdr .dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);flex-shrink:0}
+.hdr-right{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:1px}
+
+/* Intro */
+.intro{background:var(--card);border-radius:var(--r);padding:28px 28px 24px;margin-bottom:var(--gap);border:1px solid var(--border)}
+.intro h2{font-family:var(--sans);font-size:20px;font-weight:700;margin-bottom:10px;line-height:1.3}
+.intro h2 .accent{color:var(--red)}
+.intro p{font-size:13px;line-height:1.8;color:var(--dim);max-width:900px}
+.intro .tags{display:flex;gap:6px;margin-top:14px;flex-wrap:wrap}
+.intro .tag{font-family:var(--mono);font-size:10px;letter-spacing:0.8px;padding:5px 12px;border-radius:20px;border:1px solid var(--border);color:var(--dim)}
+
+/* KPI Row */
+.kpi-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:var(--gap);margin-bottom:var(--gap)}
+.kpi{background:var(--card);border-radius:var(--r);padding:20px 18px;position:relative;overflow:hidden;transition:background .2s;border:1px solid var(--border)}
+.kpi:hover{background:var(--card-hi)}
+.kpi-label{font-family:var(--mono);font-size:9px;letter-spacing:1.8px;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.kpi-value{font-family:var(--mono);font-size:34px;font-weight:800;line-height:1;letter-spacing:-2px}
+.kpi-sub{font-family:var(--mono);font-size:10px;color:var(--dim);margin-top:8px}
+.kpi-accent{position:absolute;top:0;left:0;right:0;height:2px}
+
+/* Separator */
+.sep{height:1px;background:var(--border);margin:4px 0 var(--gap)}
+
+/* Nav */
+.nav{display:flex;gap:3px;margin-bottom:var(--gap);padding:3px;background:var(--card);border-radius:var(--rs);overflow-x:auto;border:1px solid var(--border)}
+.nav-btn{font-family:var(--mono);font-size:10px;letter-spacing:1px;text-transform:uppercase;padding:10px 16px;border:none;background:transparent;color:var(--muted);border-radius:8px;cursor:pointer;white-space:nowrap;transition:all .2s}
+.nav-btn:hover{color:var(--dim)}
+.nav-btn.on{background:var(--text);color:var(--bg);font-weight:700}
+
+/* Panels */
+.panel{display:none}.panel.on{display:block}
+
+/* Page intro */
+.page-intro{margin-bottom:var(--gap);padding:0 2px}
+.page-intro h3{font-family:var(--mono);font-size:13px;font-weight:700;letter-spacing:0.5px;margin-bottom:4px}
+.page-intro p{font-size:12px;color:var(--dim);line-height:1.6;max-width:700px}
+
+/* Widget Grid */
+.wg{display:grid;gap:var(--gap);margin-bottom:var(--gap)}
+.wg-2{grid-template-columns:1fr 1fr}
+.wg-3{grid-template-columns:1fr 1fr 1fr}
+.wg-23{grid-template-columns:2fr 1fr}
+.wg-32{grid-template-columns:1fr 2fr}
+
+/* Card */
+.card{background:var(--card);border-radius:var(--r);padding:20px;position:relative;overflow:hidden;transition:background .2s;border:1px solid var(--border)}
+.card:hover{background:var(--card-hi)}
+.card-title{font-family:var(--mono);font-size:9px;letter-spacing:1.8px;text-transform:uppercase;color:var(--muted);margin-bottom:14px}
+
+/* Stat inside card */
+.card-stat{display:flex;align-items:baseline;gap:8px;margin-bottom:4px}
+.card-stat .big{font-family:var(--mono);font-size:28px;font-weight:800;letter-spacing:-1px}
+.card-stat .unit{font-family:var(--mono);font-size:11px;color:var(--muted)}
+.card-stat-sub{font-size:11px;color:var(--dim);margin-bottom:12px}
+
+/* ── CSS BAR CHARTS ────────────────────────────── */
+.css-chart{display:flex;align-items:flex-end;gap:3px;padding-top:10px}
+.css-chart .bar-area{display:flex;align-items:flex-end;gap:3px;flex:1;height:200px}
+.css-chart.tall .bar-area{height:260px}
+.css-chart .labels-row{display:flex;gap:3px}
+.css-bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;min-width:0}
+.css-bar-inner{width:100%;height:100%;display:flex;align-items:flex-end;justify-content:center}
+.css-bar{width:70%;max-width:40px;min-width:6px;border-radius:3px 3px 0 0;position:relative}
+.css-bar:hover{filter:brightness(1.3)}
+.css-bar-label{font-family:var(--mono);font-size:8px;color:var(--muted);text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding-top:4px;max-width:100%}
+.css-bar-val{font-family:var(--mono);font-size:9px;color:var(--dim);text-align:center;padding-bottom:2px;font-weight:600}
+
+/* CSS Doughnut (SVG) */
+.svg-donut-wrap{display:flex;justify-content:center;align-items:center;flex-direction:column;gap:10px}
+.svg-donut{width:180px;height:180px}
+.donut-legend{display:flex;flex-wrap:wrap;gap:4px 12px;justify-content:center;max-width:280px}
+.donut-legend-item{display:flex;align-items:center;gap:4px;font-family:var(--mono);font-size:9px;color:var(--dim)}
+.donut-legend-dot{width:8px;height:8px;border-radius:2px;flex-shrink:0}
+
+/* Line chart CSS */
+.css-line-chart{position:relative;display:flex;align-items:flex-end;gap:1px}
+.css-line-bar{flex:1;border-radius:2px 2px 0 0;min-width:2px;opacity:0.8}
+.css-line-bar:hover{opacity:1}
+
+/* Table */
+.card table{width:100%;border-collapse:collapse;font-size:12px}
+.card th{font-family:var(--mono);font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);text-align:left;padding:8px 6px;border-bottom:1px solid var(--border)}
+.card td{padding:7px 6px;border-bottom:1px solid #0d0d0d;color:var(--dim);font-family:var(--mono);font-size:11px}
+.card tr:hover td{color:var(--text);background:rgba(255,255,255,.02)}
+.card .num{text-align:right;color:var(--text);font-weight:600}
+
+/* Map */
+#map-container{height:380px;border-radius:var(--rs);overflow:hidden}
+.leaflet-tile-pane{filter:grayscale(1) invert(1) brightness(0.4) contrast(1.8)}
+.leaflet-container{background:var(--card)}
+
+/* Horizontal bars */
+.hbar{display:flex;align-items:center;gap:8px;margin-bottom:7px}
+.hbar-label{font-family:var(--mono);font-size:10px;color:var(--dim);width:130px;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hbar-track{flex:1;height:5px;background:#0a0a0a;border-radius:3px;overflow:hidden}
+.hbar-fill{height:100%;border-radius:3px;transition:width .6s ease}
+.hbar-val{font-family:var(--mono);font-size:10px;color:var(--text);width:32px;text-align:right;flex-shrink:0;font-weight:600}
+
+/* ── DIRECTORY ──────────────────────────────────── */
+.dir-bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+.dir-bar input{font-family:var(--mono);font-size:11px;padding:9px 14px;background:var(--bg);border:1px solid var(--border);border-radius:var(--rs);color:var(--text);outline:none;flex:1;min-width:200px}
+.dir-bar input:focus{border-color:var(--dim)}
+.dir-bar select{font-family:var(--mono);font-size:11px;padding:9px 12px;background:var(--bg);border:1px solid var(--border);border-radius:var(--rs);color:var(--text);outline:none;min-width:130px}
+.dir-bar select option{background:var(--bg);color:var(--text)}
+
+/* Filter dropdowns */
+.filter-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.dd-wrap{position:relative}
+.dd-btn{font-family:var(--mono);font-size:10px;letter-spacing:0.5px;padding:8px 28px 8px 12px;border-radius:var(--rs);border:1px solid var(--border);background:var(--bg);color:var(--dim);cursor:pointer;white-space:nowrap;user-select:none;transition:all .15s}
+.dd-btn:hover{border-color:var(--dim);color:var(--text)}
+.dd-btn.active{border-color:var(--blue);color:var(--text)}
+.dd-btn::after{content:'';position:absolute;right:10px;top:50%;transform:translateY(-50%);border:4px solid transparent;border-top:5px solid var(--muted)}
+.dd-panel{position:absolute;top:calc(100% + 4px);left:0;min-width:200px;max-height:280px;overflow-y:auto;background:#0a0a0a;border:1px solid var(--border);border-radius:var(--rs);padding:6px 0;z-index:100;display:none;box-shadow:0 8px 24px rgba(0,0,0,.6)}
+.dd-panel.open{display:block}
+.dd-panel::-webkit-scrollbar{width:3px}
+.dd-panel::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+.dd-item{display:flex;align-items:center;gap:8px;padding:6px 12px;cursor:pointer;font-family:var(--mono);font-size:10px;color:var(--dim);transition:background .1s}
+.dd-item:hover{background:rgba(255,255,255,.04);color:var(--text)}
+.dd-item input[type=checkbox]{appearance:none;-webkit-appearance:none;width:12px;height:12px;border:1px solid var(--muted);border-radius:3px;background:transparent;cursor:pointer;flex-shrink:0;position:relative}
+.dd-item input[type=checkbox]:checked{background:var(--blue);border-color:var(--blue)}
+.dd-item input[type=checkbox]:checked::after{content:'';position:absolute;top:1px;left:3px;width:4px;height:7px;border:solid #000;border-width:0 2px 2px 0;transform:rotate(45deg)}
+.dd-badge{font-family:var(--mono);font-size:9px;background:var(--blue);color:#000;border-radius:8px;padding:1px 6px;margin-left:4px;font-weight:700}
+
+.dir-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:var(--gap);max-height:68vh;overflow-y:auto;padding-right:4px}
+.dir-grid::-webkit-scrollbar{width:3px}
+.dir-grid::-webkit-scrollbar-track{background:transparent}
+.dir-grid::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+
+.co-card{background:var(--card);border-radius:var(--rs);padding:14px 16px;cursor:pointer;transition:all .15s;border:1px solid var(--border)}
+.co-card:hover{background:var(--card-hi);border-color:#333}
+.co-name{font-family:var(--mono);font-size:12px;font-weight:600;margin-bottom:5px;display:flex;justify-content:space-between;align-items:center}
+.co-name .score{font-size:16px;font-weight:800;letter-spacing:-1px}
+.co-meta{font-size:10px;color:var(--dim);display:flex;gap:10px;flex-wrap:wrap;font-family:var(--mono)}
+.co-desc{font-size:11px;color:var(--muted);margin-top:6px;line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.co-conf-bar{height:3px;background:#0a0a0a;border-radius:2px;margin-top:8px;overflow:hidden}
+.co-conf-fill{height:100%;border-radius:2px}
+
+/* Score colors */
+.sc-hi{color:var(--green)}.sc-md{color:var(--amber)}.sc-lo{color:var(--red)}
+
+/* Modal */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:1000;display:none;align-items:center;justify-content:center;backdrop-filter:blur(10px)}
+.modal-bg.on{display:flex}
+.modal{background:var(--card);border:1px solid var(--border);border-radius:var(--r);width:90%;max-width:620px;max-height:85vh;overflow-y:auto;padding:26px;position:relative}
+.modal::-webkit-scrollbar{width:3px}
+.modal::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+.modal-close{position:absolute;top:14px;right:16px;background:none;border:none;color:var(--muted);font-size:18px;cursor:pointer;font-family:var(--mono)}
+.modal-close:hover{color:var(--text)}
+.modal h2{font-family:var(--mono);font-size:16px;font-weight:700;margin-bottom:3px;padding-right:30px}
+.modal .m-sub{font-size:11px;color:var(--dim);margin-bottom:16px;font-family:var(--mono)}
+.modal .m-row{display:flex;gap:20px;margin-bottom:12px;flex-wrap:wrap}
+.modal .m-field{flex:1;min-width:110px}
+.modal .m-label{font-family:var(--mono);font-size:8px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:3px}
+.modal .m-val{font-size:12px;color:var(--text)}
+.modal .m-bar{height:3px;background:#0a0a0a;border-radius:2px;margin-top:10px;overflow:hidden}
+.modal .m-bar-fill{height:100%;border-radius:2px;transition:width .4s ease}
+.modal .m-desc{font-size:12px;line-height:1.7;color:var(--dim);margin-top:14px;padding-top:14px;border-top:1px solid var(--border)}
+.modal a{color:var(--blue);text-decoration:none}
+.modal a:hover{text-decoration:underline}
+
+/* ── FOOTER ─────────────────────────────────────── */
+.footer{border-top:1px solid var(--border);margin-top:30px;padding:28px 4px 24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:20px}
+.footer-left{display:flex;align-items:center;gap:14px}
+.footer-avatar{width:40px;height:40px;border-radius:50%;object-fit:cover;border:2px solid var(--border)}
+.footer-info{font-size:12px;color:var(--dim);line-height:1.5}
+.footer-info .name{color:var(--text);font-weight:600;font-family:var(--mono);font-size:12px}
+.footer-info a{color:var(--blue);text-decoration:none}
+.footer-info a:hover{text-decoration:underline}
+.footer-right{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:1px;text-align:right}
+
+/* Count badge */
+.dir-count{font-family:var(--mono);font-size:10px;color:var(--muted);margin-bottom:10px}
+
+/* Dark tooltip */
+.dark-tip{background:#1a1a1a!important;color:#fff!important;border:1px solid #333!important;border-radius:6px!important;font-family:var(--mono)!important;font-size:10px!important;padding:6px 10px!important;box-shadow:none!important}
+.dark-tip::before{display:none!important}
+
+/* Intel card */
+.intel-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:20px;margin-bottom:var(--gap);position:relative;overflow:hidden}
+.intel-card .kpi-accent{position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--red),var(--blue))}
+.intel-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.intel-header-left{display:flex;align-items:center;gap:10px}
+.intel-header .card-title{margin-bottom:0}
+.intel-kpis{display:flex;gap:16px}
+.intel-kpi{display:flex;align-items:baseline;gap:4px}
+.intel-kpi .val{font-family:var(--mono);font-size:20px;font-weight:800;letter-spacing:-1px}
+.intel-kpi .label{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:0.5px}
+.intel-grid{display:grid;grid-template-columns:1fr 180px;gap:16px}
+.intel-items{display:flex;flex-direction:column;gap:0}
+.intel-item{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid #0d0d0d;font-size:11px;color:var(--dim);font-family:var(--mono)}
+.intel-item:last-child{border-bottom:none}
+.intel-cat{font-size:9px;letter-spacing:0.8px;padding:2px 8px;border-radius:12px;border:1px solid;flex-shrink:0;text-transform:uppercase}
+.intel-headline{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text);font-family:var(--sans);font-size:12px}
+.intel-src{font-size:9px;color:var(--muted);flex-shrink:0}
+.intel-cats{display:flex;flex-direction:column;gap:6px;padding-left:16px;border-left:1px solid var(--border)}
+.intel-cat-row{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.intel-cat-name{font-family:var(--mono);font-size:10px;text-transform:capitalize}
+.intel-cat-cnt{font-family:var(--mono);font-size:16px;font-weight:700;color:var(--text)}
+.intel-more{display:inline-block;margin-top:10px;font-family:var(--mono);font-size:10px;color:var(--blue);text-decoration:none;letter-spacing:0.5px}
+.intel-more:hover{text-decoration:underline}
+@media(max-width:900px){.intel-grid{grid-template-columns:1fr}.intel-cats{border-left:none;padding-left:0;border-top:1px solid var(--border);padding-top:12px}}
+
+/* Responsive */
+@media(max-width:900px){
+  .kpi-grid{grid-template-columns:repeat(3,1fr)}
+  .wg-2,.wg-3,.wg-23,.wg-32{grid-template-columns:1fr}
+  .dir-grid{grid-template-columns:1fr}
+  .footer{flex-direction:column;align-items:flex-start}
+}
+@media(max-width:600px){
+  .kpi-grid{grid-template-columns:1fr 1fr}
+  .hdr{flex-direction:column;align-items:flex-start;gap:8px}
+  .intro{padding:20px}
+}
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <!-- HEADER -->
+  <div class="hdr">
+    <div class="hdr-left">
+      <div class="dot"></div>
+      <h1>Turkey AI Ecosystem</h1>
+    </div>
+    <div class="hdr-right"><!--DATA_DATE--></div>
+  </div>
+
+  <!-- INTRO -->
+  <div class="intro">
+    <h2>Mapping <span class="accent">Turkey's</span> Artificial Intelligence Landscape</h2>
+    <p>
+      This dashboard provides a comprehensive, data-driven view of Turkey's AI startup ecosystem.
+      The entire database &mdash; spanning <!--KPI_TOTAL--> companies, <!--KPI_INVESTOR_COUNT--> investors, and <!--KPI_DEALS--> tracked deals &mdash;
+      is autonomously built and maintained by an AI-powered multi-agent system.
+      Each company profile is researched, verified, and enriched through a three-pass LLM
+      pipeline that extracts facts from web sources, classifies AI relevance, and audits data quality.
+      No manual data entry &mdash; every field is machine-generated and continuously updated.
+    </p>
+    <div class="tags">
+      <span class="tag">AI-Generated Database</span>
+      <span class="tag"><!--KPI_TOTAL--> Companies</span>
+      <span class="tag">Multi-Agent Orchestration</span>
+      <span class="tag">Three-Pass LLM Enrichment</span>
+      <span class="tag">Live Data Pipeline</span>
+    </div>
+  </div>
+
+  <!-- KPIs -->
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="kpi-accent" style="background:var(--amber)"></div>
+      <div class="kpi-label">Companies</div>
+      <div class="kpi-value"><!--KPI_TOTAL--></div>
+      <div class="kpi-sub">Active in ecosystem</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-accent" style="background:var(--green)"></div>
+      <div class="kpi-label">Avg AI Proximity</div>
+      <div class="kpi-value"><!--KPI_AVG_AI--><span style="font-size:18px;color:var(--muted)">%</span></div>
+      <div class="kpi-sub"><!--KPI_CORE_AI--> core AI companies</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-accent" style="background:var(--blue)"></div>
+      <div class="kpi-label">Investors</div>
+      <div class="kpi-value"><!--KPI_INVESTORS--></div>
+      <div class="kpi-sub"><!--KPI_DEALS--> deals tracked</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-accent" style="background:var(--purple)"></div>
+      <div class="kpi-label">Cities</div>
+      <div class="kpi-value"><!--KPI_CITIES--></div>
+      <div class="kpi-sub"><!--KPI_TOP_CITY--> <!--KPI_TOP_CITY_PCT-->%</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-accent" style="background:var(--red)"></div>
+      <div class="kpi-label">Founded 2020+</div>
+      <div class="kpi-value"><!--KPI_RECENT--></div>
+      <div class="kpi-sub"><!--KPI_RECENT_PCT-->% of total</div>
+    </div>
+  </div>
+
+  <div class="sep"></div>
+
+  <!-- NAV -->
+  <div class="nav">
+    <button class="nav-btn on" onclick="sw('overview',this)">Overview</button>
+    <button class="nav-btn" onclick="sw('sectors',this)">Sectors</button>
+    <button class="nav-btn" onclick="sw('geo',this)">Geography</button>
+    <button class="nav-btn" onclick="sw('funding',this)">Funding</button>
+    <button class="nav-btn" onclick="sw('tech',this)">Technology</button>
+    <button class="nav-btn" onclick="sw('dir',this)">Directory</button>
+    <a class="nav-btn" href="intel.html" style="text-decoration:none">Intel Report &rarr;</a>
+  </div>
+
+  <!-- ═══ OVERVIEW ═══ -->
+  <div class="panel on" id="p-overview">
+    <div class="page-intro">
+      <h3>Ecosystem at a Glance</h3>
+      <p>A high-level snapshot of Turkey's AI landscape &mdash; maturity distribution, dominant business models, cloud readiness, and data quality across all tracked companies.</p>
+    </div>
+
+    <!-- Weekly Intel Card -->
+    <div class="intel-card">
+      <div class="kpi-accent"></div>
+      <div class="intel-header">
+        <div class="intel-header-left">
+          <div class="card-title">This Week's Intel</div>
+          <div class="intel-kpis">
+            <div class="intel-kpi"><span class="val" style="color:var(--blue)"><!--INTEL_NEWS_COUNT--></span><span class="label">news</span></div>
+            <div class="intel-kpi"><span class="val" style="color:var(--green)"><!--INTEL_NEW_STARTUPS--></span><span class="label">new companies</span></div>
+          </div>
+        </div>
+        <a href="intel.html" class="intel-more">Full Report &rarr;</a>
+      </div>
+      <div class="intel-grid">
+        <div class="intel-items">
+          <!--INTEL_HEADLINES-->
+        </div>
+        <div class="intel-cats">
+          <!--INTEL_CATEGORIES-->
+        </div>
+      </div>
+    </div>
+
+    <div class="wg wg-2">
+      <div class="card">
+        <div class="card-title">AI Proximity Distribution</div>
+        <div class="card-stat"><span class="big" style="color:var(--green)"><!--KPI_CORE_AI--></span><span class="unit">companies at 90%+ AI</span></div>
+        <div class="card-stat-sub">Score measures how central AI is to a company's core product or service</div>
+        <div id="ch-ai-dist"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">AI Maturity Buckets</div>
+        <div class="card-stat"><span class="big"><!--KPI_AVG_AI--></span><span class="unit">% average proximity</span></div>
+        <div class="card-stat-sub">Companies grouped by their AI involvement depth</div>
+        <div id="ch-ai-buckets"></div>
+      </div>
+    </div>
+    <div class="wg wg-3">
+      <div class="card">
+        <div class="card-title">Business Model</div>
+        <div class="card-stat"><span class="big"><!--KPI_PRODUCT_PCT--></span><span class="unit">% product companies</span></div>
+        <div class="card-stat-sub">Product vs. consultancy vs. hybrid split</div>
+        <div id="ch-bmodel"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Cloud Readiness</div>
+        <div class="card-stat-sub">Infrastructure classification of AI products</div>
+        <div id="ch-cloud"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Data Confidence</div>
+        <div class="card-stat"><span class="big"><!--KPI_AVG_CONF--></span><span class="unit">avg score</span></div>
+        <div class="card-stat-sub">How complete and verified each company profile is</div>
+        <div id="ch-confidence"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ SECTORS ═══ -->
+  <div class="panel" id="p-sectors">
+    <div class="page-intro">
+      <h3>Sector Breakdown</h3>
+      <p>AI adoption spans every major industry in Turkey. Technology leads, followed by Services and Manufacturing &mdash; reflecting the broad industrial base being augmented by AI capabilities.</p>
+    </div>
+    <div class="wg wg-2">
+      <div class="card">
+        <div class="card-title">Companies by Sector</div>
+        <div id="ch-sectors"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Top Subcategories</div>
+        <div id="ch-subcats"></div>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:var(--gap)">
+      <div class="card-title">Sector Detail</div>
+      <table>
+        <thead><tr><th>Sector</th><th class="num">Companies</th><th class="num">Share</th></tr></thead>
+        <tbody id="sector-table"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ═══ GEOGRAPHY ═══ -->
+  <div class="panel" id="p-geo">
+    <div class="page-intro">
+      <h3>Geographic Distribution</h3>
+      <p>Turkey's AI ecosystem is heavily concentrated in Istanbul, which hosts the majority of companies. Ankara serves as the second hub, driven by defense and public sector AI.</p>
+    </div>
+    <div class="wg wg-23">
+      <div class="card">
+        <div class="card-title">Turkey &mdash; Company Density</div>
+        <div id="map-container"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Top Cities</div>
+        <div id="city-bars"></div>
+      </div>
+    </div>
+    <div class="wg wg-2">
+      <div class="card">
+        <div class="card-title">Companies Founded by Year</div>
+        <div class="card-stat"><span class="big"><!--KPI_RECENT--></span><span class="unit">founded since 2020</span></div>
+        <div class="card-stat-sub"><!--KPI_RECENT_PCT-->% of the ecosystem is less than 5 years old</div>
+        <div id="ch-years"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">City Share</div>
+        <div id="ch-cities-pie"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ FUNDING ═══ -->
+  <div class="panel" id="p-funding">
+    <div class="page-intro">
+      <h3>Funding &amp; Investors</h3>
+      <p>Tracking investment activity across the Turkish AI ecosystem &mdash; round types, deal volume over time, and the most active investors.</p>
+    </div>
+    <div class="wg wg-2">
+      <div class="card">
+        <div class="card-title">Deals by Round Type</div>
+        <div class="card-stat"><span class="big"><!--KPI_DEALS--></span><span class="unit">total deals tracked</span></div>
+        <div id="ch-rounds"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Deal Timeline</div>
+        <div class="card-stat"><span class="big"><!--KPI_INVESTORS--></span><span class="unit">unique investors</span></div>
+        <div id="ch-timeline"></div>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:var(--gap)">
+      <div class="card-title">Top Investors</div>
+      <table>
+        <thead><tr><th>Investor</th><th>Type</th><th>Location</th><th class="num">Deals</th></tr></thead>
+        <tbody id="inv-table"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ═══ TECHNOLOGY ═══ -->
+  <div class="panel" id="p-tech">
+    <div class="page-intro">
+      <h3>Technology Stack</h3>
+      <p>The most commonly used AI technologies and frameworks across the ecosystem. Machine Learning and NLP dominate, with strong adoption of Computer Vision and IoT.</p>
+    </div>
+    <div class="wg wg-23">
+      <div class="card">
+        <div class="card-title">Technology Frequency</div>
+        <div id="ch-tech"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Top Technologies</div>
+        <div id="tech-bars"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ DIRECTORY ═══ -->
+  <div class="panel" id="p-dir">
+    <div class="page-intro">
+      <h3>Company Directory</h3>
+      <p>Browse all <!--KPI_TOTAL--> companies in the database. Use the dropdown filters to narrow down by sector, city, or business model. Default sort is by data confidence score.</p>
+    </div>
+    <div class="card" style="margin-bottom:var(--gap)">
+      <div class="dir-bar">
+        <input type="text" id="dir-search" placeholder="Search by name, description, or category...">
+        <select id="dir-sort">
+          <option value="conf">Confidence</option>
+          <option value="prox">AI Proximity</option>
+          <option value="name">Name A-Z</option>
+          <option value="year">Year Founded</option>
+        </select>
+      </div>
+
+      <div class="filter-row">
+        <div class="dd-wrap" id="dd-sectors">
+          <div class="dd-btn" onclick="toggleDD('dd-sectors')">Sectors</div>
+          <div class="dd-panel" id="dd-sectors-panel"></div>
+        </div>
+        <div class="dd-wrap" id="dd-cities">
+          <div class="dd-btn" onclick="toggleDD('dd-cities')">Cities</div>
+          <div class="dd-panel" id="dd-cities-panel"></div>
+        </div>
+        <div class="dd-wrap" id="dd-bmodels">
+          <div class="dd-btn" onclick="toggleDD('dd-bmodels')">Business Model</div>
+          <div class="dd-panel" id="dd-bmodels-panel"></div>
+        </div>
+      </div>
+
+      <div class="dir-count" id="dir-count"></div>
+      <div class="dir-grid" id="dir-grid"></div>
+    </div>
+  </div>
+
+</div><!-- .shell -->
+
+<!-- Footer -->
+<div class="shell">
+  <div class="footer">
+    <div class="footer-left">
+      <img class="footer-avatar" src="IMG_7541.jpeg" alt="Yashar Kardar">
+      <div class="footer-info">
+        <div class="name">Yashar Kardar</div>
+        <div>Designed &amp; built with AI-powered multi-agent orchestration</div>
+        <a href="https://www.linkedin.com/in/yasharkd/" target="_blank" rel="noopener">linkedin.com/in/yasharkd</a>
+      </div>
+    </div>
+    <div class="footer-right">
+      &copy; 2025 Yashar Kardar<br>All rights reserved
+    </div>
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="modal-bg" id="modal-bg" onclick="if(event.target===this)closeModal()">
+  <div class="modal" id="modal"></div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+// DATA
+// ═══════════════════════════════════════════════════════════
+/*DATA_BLOCK*/
+
+// ═══════════════════════════════════════════════════════════
+// PURE CSS/HTML CHART RENDERERS (no Chart.js dependency)
+// ═══════════════════════════════════════════════════════════
+const COLORS = ['#60a5fa','#34d399','#fbbf24','#a78bfa','#f87171','#38bdf8','#fb923c','#4ade80','#e879f9','#facc15','#2dd4bf','#818cf8'];
+
+function renderBarChart(containerId, labels, values, color, opts={}) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  const mx = Math.max(...values);
+  const maxH = opts.tall ? 240 : 180;
+  el.innerHTML = labels.map(function(label, i) {
+    var h = mx > 0 ? Math.max(2, Math.round(values[i] / mx * maxH)) : 0;
+    return '<div class="css-bar-wrap">' +
+      '<div class="css-bar-val">' + values[i] + '</div>' +
+      '<div style="width:70%;max-width:40px;min-width:6px;height:' + h + 'px;background:' + color + ';border-radius:3px 3px 0 0" title="' + label + ': ' + values[i] + '"></div>' +
+      '<div class="css-bar-label">' + label + '</div>' +
+      '</div>';
+  }).join('');
+  el.style.display = 'flex';
+  el.style.alignItems = 'flex-end';
+  el.style.gap = '2px';
+  el.style.paddingTop = '10px';
+}
+
+function renderLineChart(containerId, labels, values, color) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  const mx = Math.max(...values);
+  var maxH = 160;
+  el.innerHTML = '<div class="css-line-chart">' +
+    labels.map(function(label, i) {
+      var h = mx > 0 ? Math.max(1, Math.round(values[i] / mx * maxH)) : 0;
+      return '<div class="css-line-bar" style="height:' + h + 'px;background:linear-gradient(to top, transparent, ' + color + ')" title="' + label + ': ' + values[i] + '"></div>';
+    }).join('') + '</div>' +
+    '<div style="display:flex;justify-content:space-between;margin-top:4px;padding:0 2px">' +
+    '<span style="font-family:var(--mono);font-size:8px;color:var(--muted)">' + labels[0] + '</span>' +
+    '<span style="font-family:var(--mono);font-size:8px;color:var(--muted)">' + labels[labels.length-1] + '</span>' +
+    '</div>';
+}
+
+function renderDonut(containerId, labels, values, opts={}) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  const total = values.reduce((s, v) => s + v, 0);
+  if (total === 0) return;
+  const colors = opts.colors || COLORS.slice(0, labels.length);
+  const size = opts.size || 180;
+  const r = size / 2;
+  const inner = r * 0.6;
+
+  let segments = '';
+  let angle = -90;
+  for (let i = 0; i < values.length; i++) {
+    const pct = values[i] / total;
+    const sweep = pct * 360;
+    if (sweep < 0.5) { angle += sweep; continue; }
+    const startRad = angle * Math.PI / 180;
+    const endRad = (angle + sweep) * Math.PI / 180;
+    const largeArc = sweep > 180 ? 1 : 0;
+    const x1 = r + r * Math.cos(startRad);
+    const y1 = r + r * Math.sin(startRad);
+    const x2 = r + r * Math.cos(endRad);
+    const y2 = r + r * Math.sin(endRad);
+    const ix1 = r + inner * Math.cos(startRad);
+    const iy1 = r + inner * Math.sin(startRad);
+    const ix2 = r + inner * Math.cos(endRad);
+    const iy2 = r + inner * Math.sin(endRad);
+    segments += '<path d="M' + x1 + ',' + y1 + ' A' + r + ',' + r + ' 0 ' + largeArc + ',1 ' + x2 + ',' + y2 +
+      ' L' + ix2 + ',' + iy2 + ' A' + inner + ',' + inner + ' 0 ' + largeArc + ',0 ' + ix1 + ',' + iy1 +
+      ' Z" fill="' + colors[i] + '" opacity="0.85"><title>' + labels[i] + ': ' + values[i] + ' (' + (pct * 100).toFixed(1) + '%)</title></path>';
+    angle += sweep;
+  }
+
+  const legend = labels.map((l, i) =>
+    '<div class="donut-legend-item"><div class="donut-legend-dot" style="background:' + colors[i] + '"></div>' + l + '</div>'
+  ).join('');
+
+  el.innerHTML = '<div class="svg-donut-wrap">' +
+    '<svg class="svg-donut" viewBox="0 0 ' + size + ' ' + size + '">' + segments + '</svg>' +
+    '<div class="donut-legend">' + legend + '</div></div>';
+}
+
+function renderHBars(containerId, items, labelKey, valueKey, color) {
+  const el = document.getElementById(containerId);
+  if (!el || !items.length) return;
+  const mx = Math.max(...items.map(d => d[valueKey]));
+  el.innerHTML = items.slice(0, 15).map(d =>
+    '<div class="hbar"><div class="hbar-label">' + d[labelKey] + '</div><div class="hbar-track"><div class="hbar-fill" style="width:' + (d[valueKey] / mx * 100).toFixed(1) + '%;background:' + color + '"></div></div><div class="hbar-val">' + d[valueKey] + '</div></div>'
+  ).join('');
+}
+
+// ═══════════════════════════════════════════════════════════
+// RENDER ALL CHARTS
+// ═══════════════════════════════════════════════════════════
+
+// Overview
+renderBarChart('ch-ai-dist', AI_PROXIMITY_DIST.map(d=>d.score), AI_PROXIMITY_DIST.map(d=>d.count), '#60a5fa');
+renderDonut('ch-ai-buckets', AI_BUCKETS.map(d=>d.bucket), AI_BUCKETS.map(d=>d.cnt));
+renderDonut('ch-bmodel', BMODELS.map(d=>d.business_model), BMODELS.map(d=>d.cnt));
+renderDonut('ch-cloud', CLOUD_RELEVANCE.map(d=>d.label), CLOUD_RELEVANCE.map(d=>d.count));
+renderDonut('ch-confidence', DATA_CONFIDENCE.map(d=>d.bucket), DATA_CONFIDENCE.map(d=>d.cnt));
+
+// Sectors
+renderBarChart('ch-sectors', SECTORS.map(d=>d.sector), SECTORS.map(d=>d.count), '#a78bfa', {tall:true});
+renderBarChart('ch-subcats', SUBCATEGORIES.map(d=>d.subcat), SUBCATEGORIES.map(d=>d.count), '#fbbf24', {tall:true});
+(function(){
+  const tb=document.getElementById('sector-table');if(!tb)return;
+  const total=SECTORS.reduce((s,d)=>s+d.count,0);
+  tb.innerHTML=SECTORS.map(d=>'<tr><td style="color:var(--text)">'+d.sector+'</td><td class="num">'+d.count+'</td><td class="num">'+(d.count/total*100).toFixed(1)+'%</td></tr>').join('');
+})();
+
+// Geography
+renderLineChart('ch-years', YEARS.map(d=>d.year), YEARS.map(d=>d.cnt), '#34d399');
+renderDonut('ch-cities-pie', CITIES.slice(0,8).map(d=>d.city), CITIES.slice(0,8).map(d=>d.cnt));
+renderHBars('city-bars', CITIES, 'city', 'cnt', '#fbbf24');
+
+// Funding
+renderBarChart('ch-rounds', ROUND_TYPES.map(d=>d.round_type), ROUND_TYPES.map(d=>d.cnt), '#f87171');
+renderLineChart('ch-timeline', DEAL_TIMELINE.map(d=>d.year), DEAL_TIMELINE.map(d=>d.cnt), '#60a5fa');
+(function(){
+  const tb=document.getElementById('inv-table');if(!tb)return;
+  tb.innerHTML=TOP_INVESTORS.slice(0,30).map(d=>'<tr><td style="color:var(--text)">'+d.investor_name+'</td><td>'+d.investor_type+'</td><td>'+d.location+'</td><td class="num">'+d.deal_count+'</td></tr>').join('');
+})();
+
+// Technology
+renderBarChart('ch-tech', TECH_LIST.map(d=>d.tech), TECH_LIST.map(d=>d.count), '#38bdf8', {tall:true});
+renderHBars('tech-bars', TECH_LIST, 'tech', 'count', '#38bdf8');
+
+// ═══════════════════════════════════════════════════════════
+// MAP
+// ═══════════════════════════════════════════════════════════
+const CC={'Istanbul':[41.01,28.98],'Ankara':[39.93,32.86],'Izmir':[38.42,27.14],'Antalya':[36.9,30.71],'Bursa':[40.19,29.06],'Kocaeli':[40.77,29.94],'Eskisehir':[39.77,30.53],'Adana':[37,35.32],'Konya':[37.87,32.49],'Gaziantep':[37.07,37.38],'Samsun':[41.29,36.33],'Trabzon':[41,39.72],'Kayseri':[38.73,35.48],'Mersin':[36.8,34.63],'Denizli':[37.78,29.09],'Mugla':[37.22,28.36],'Manisa':[38.62,27.43],'\u0130stanbul':[41.01,28.98],'\u0130zmir':[38.42,27.14],'Eskişehir':[39.77,30.53],'İstanbul':[41.01,28.98],'İzmir':[38.42,27.14],'Tekirdağ':[41,27.52]};
+let mapOK=false;
+function initMap(){
+  if(mapOK)return;mapOK=true;
+  const m=L.map('map-container',{zoomControl:false,attributionControl:false}).setView([39,35],6);
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png',{maxZoom:10}).addTo(m);
+  const mx=Math.max(...CITIES.map(c=>c.cnt));
+  CITIES.forEach(c=>{const ll=CC[c.city];if(!ll)return;const r=Math.max(5,Math.min(26,(c.cnt/mx)*26));L.circleMarker(ll,{radius:r,fillColor:'#60a5fa',fillOpacity:0.45,color:'#60a5fa',weight:1,opacity:0.7}).bindTooltip('<b>'+c.city+'</b><br>'+c.cnt+' companies',{className:'dark-tip'}).addTo(m);});
+}
+
+// ═══════════════════════════════════════════════════════════
+// DIRECTORY — DROPDOWN FILTERS
+// ═══════════════════════════════════════════════════════════
+const _filters = {sectors: new Set(), cities: new Set(), bmodels: new Set()};
+
+function scClass(v){return v>=70?'sc-hi':v>=40?'sc-md':'sc-lo'}
+
+function toggleDD(wrapId) {
+  const panel = document.getElementById(wrapId + '-panel');
+  const wasOpen = panel.classList.contains('open');
+  // Close all dropdowns
+  document.querySelectorAll('.dd-panel').forEach(p => p.classList.remove('open'));
+  if (!wasOpen) panel.classList.add('open');
+}
+
+// Close dropdowns when clicking outside
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('.dd-wrap')) {
+    document.querySelectorAll('.dd-panel').forEach(p => p.classList.remove('open'));
+  }
+});
+
+function buildDropdown(panelId, items, filterKey, wrapId) {
+  const panel = document.getElementById(panelId);
+  panel.innerHTML = items.map(v =>
+    '<label class="dd-item" onclick="event.stopPropagation()"><input type="checkbox" value="' + v + '" onchange="onDDChange(this,\'' + filterKey + '\',\'' + wrapId + '\')">' + v + '</label>'
+  ).join('');
+}
+
+function onDDChange(checkbox, filterKey, wrapId) {
+  const val = checkbox.value;
+  if (checkbox.checked) _filters[filterKey].add(val);
+  else _filters[filterKey].delete(val);
+  updateDDBtn(wrapId, filterKey);
+  renderDir();
+}
+
+function updateDDBtn(wrapId, filterKey) {
+  const btn = document.querySelector('#' + wrapId + ' .dd-btn');
+  const count = _filters[filterKey].size;
+  const baseName = wrapId === 'dd-sectors' ? 'Sectors' : wrapId === 'dd-cities' ? 'Cities' : 'Business Model';
+  if (count > 0) {
+    btn.innerHTML = baseName + '<span class="dd-badge">' + count + '</span>';
+    btn.classList.add('active');
+  } else {
+    btn.textContent = baseName;
+    btn.classList.remove('active');
+  }
+}
+
+function renderDir(){
+  const q=document.getElementById('dir-search').value.toLowerCase();
+  const srt=document.getElementById('dir-sort').value;
+  let list=ALL_STARTUPS.filter(s=>{
+    if(q&&!((s.company_name||'').toLowerCase().includes(q)||(s.ai_explanation||'').toLowerCase().includes(q)||(s.Category||'').toLowerCase().includes(q)))return false;
+    if(_filters.sectors.size){const sec=(s.Category||'').split('|')[0]||'';if(!_filters.sectors.has(sec))return false;}
+    if(_filters.cities.size){if(!_filters.cities.has(s.city))return false;}
+    if(_filters.bmodels.size){if(!_filters.bmodels.has(s.business_model))return false;}
+    return true;
+  });
+  if(srt==='name')list.sort((a,b)=>(a.company_name||'').localeCompare(b.company_name||''));
+  else if(srt==='year')list.sort((a,b)=>(b.founded_year||0)-(a.founded_year||0));
+  else if(srt==='prox')list.sort((a,b)=>(b.tech_proximity||0)-(a.tech_proximity||0));
+  else list.sort((a,b)=>(b.data_confidence||0)-(a.data_confidence||0));
+
+  document.getElementById('dir-count').textContent='Showing ' + Math.min(list.length,200) + ' of ' + list.length + ' companies';
+  const grid=document.getElementById('dir-grid');
+  grid.innerHTML=list.slice(0,200).map(function(s,i){
+    var conf=s.data_confidence||0;
+    var confColor=conf>=70?'var(--green)':conf>=40?'var(--amber)':'var(--red)';
+    return '<div class="co-card" onclick="showCo('+i+')" data-idx="'+i+'">' +
+      '<div class="co-name"><span>'+(s.company_name||'\u2014')+'</span><span class="score '+scClass(conf)+'">'+conf+'</span></div>' +
+      '<div class="co-meta"><span>'+(s.city||'\u2014')+'</span><span>'+(s.founded_year||'\u2014')+'</span><span>'+((s.Category||'').split('|')[0]||'\u2014')+'</span></div>' +
+      '<div class="co-desc">'+(s.ai_explanation||'')+'</div>' +
+      '<div class="co-conf-bar"><div class="co-conf-fill" style="width:'+conf+'%;background:'+confColor+'"></div></div>' +
+      '</div>';
+  }).join('');
+  window._dirList=list;
+}
+
+// Build filter dropdowns
+(function(){
+  var secs=[...new Set(ALL_STARTUPS.map(s=>(s.Category||'').split('|')[0]).filter(Boolean))].sort();
+  var cits=[...new Set(ALL_STARTUPS.map(s=>s.city).filter(Boolean))].sort();
+  var bms=[...new Set(ALL_STARTUPS.map(s=>s.business_model).filter(Boolean))].sort();
+  buildDropdown('dd-sectors-panel', secs, 'sectors', 'dd-sectors');
+  buildDropdown('dd-cities-panel', cits, 'cities', 'dd-cities');
+  buildDropdown('dd-bmodels-panel', bms, 'bmodels', 'dd-bmodels');
+  document.getElementById('dir-search').oninput=renderDir;
+  document.getElementById('dir-sort').onchange=renderDir;
+  renderDir();
+})();
+
+function showCo(idx){
+  var s=window._dirList[idx];if(!s)return;
+  var p=s.tech_proximity||0;var c=s.data_confidence||0;
+  document.getElementById('modal').innerHTML=
+    '<button class="modal-close" onclick="closeModal()">&times;</button>' +
+    '<h2>'+(s.company_name||'\u2014')+'</h2>' +
+    '<div class="m-sub">'+(s.Category||'\u2014')+' &middot; '+(s.city||'\u2014')+' &middot; Est. '+(s.founded_year||'\u2014')+'</div>' +
+    '<div class="m-row">' +
+      '<div class="m-field"><div class="m-label">AI Proximity</div><div class="m-val '+scClass(p)+'" style="font-family:var(--mono);font-size:20px;font-weight:800">'+p+'%</div></div>' +
+      '<div class="m-field"><div class="m-label">Business Model</div><div class="m-val">'+(s.business_model||'\u2014')+'</div></div>' +
+      '<div class="m-field"><div class="m-label">Funding</div><div class="m-val">'+(s.Total_Funding_Formatted||'\u2014')+'</div></div>' +
+    '</div>' +
+    '<div class="m-row">' +
+      '<div class="m-field"><div class="m-label">Founders</div><div class="m-val">'+(s.founders||'\u2014')+'</div></div>' +
+      '<div class="m-field"><div class="m-label">Investors</div><div class="m-val">'+(s.Investors||'\u2014')+'</div></div>' +
+    '</div>' +
+    '<div class="m-row">' +
+      '<div class="m-field"><div class="m-label">Technologies</div><div class="m-val">'+(s.Tech_Mentioned||'\u2014')+'</div></div>' +
+      '<div class="m-field"><div class="m-label">Website</div><div class="m-val">'+(s.website?'<a href="'+s.website+'" target="_blank">'+s.website+'</a>':'\u2014')+'</div></div>' +
+    '</div>' +
+    '<div class="m-label" style="margin-top:12px">Data Confidence</div>' +
+    '<div class="m-bar"><div class="m-bar-fill" style="width:'+c+'%;background:'+(c>=70?'var(--green)':c>=40?'var(--amber)':'var(--red)')+'"></div></div>' +
+    '<div class="m-desc">'+(s.ai_explanation||'No description available.')+'</div>';
+  document.getElementById('modal-bg').classList.add('on');
+  document.body.style.overflow='hidden';
+}
+
+function closeModal(){document.getElementById('modal-bg').classList.remove('on');document.body.style.overflow=''}
+document.addEventListener('keydown',function(e){if(e.key==='Escape')closeModal()});
+
+// ═══════════════════════════════════════════════════════════
+// TAB SWITCHING
+// ═══════════════════════════════════════════════════════════
+function sw(id, btn){
+  document.querySelectorAll('.panel').forEach(function(p){p.classList.remove('on')});
+  document.querySelectorAll('.nav-btn').forEach(function(b){b.classList.remove('on')});
+  document.getElementById('p-'+id).classList.add('on');
+  btn.classList.add('on');
+  if(id==='geo')setTimeout(initMap,100);
+}
+</script>
+</body>
+</html>
