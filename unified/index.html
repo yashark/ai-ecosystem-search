@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>AI &amp; Retail/Ecommerce Tech Tracker — UK · Europe · Turkey · MENA</title>
+<style>
+  :root { --bg:#0f1220; --card:#191d33; --ink:#e9ecf5; --mut:#9aa3c0; --acc:#6ea8fe; --acc2:#7ee0b8; --line:#2a3050; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; background:var(--bg); color:var(--ink); }
+  header { padding:28px 32px 12px; border-bottom:1px solid var(--line); }
+  h1 { margin:0 0 4px; font-size:22px; }
+  .sub { color:var(--mut); font-size:13px; }
+  .wrap { padding:20px 32px 60px; }
+  .kpis { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:14px; margin:18px 0 26px; }
+  .kpi { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:16px 18px; }
+  .kpi .n { font-size:28px; font-weight:700; }
+  .kpi .l { color:var(--mut); font-size:12px; text-transform:uppercase; letter-spacing:.04em; }
+  .grid { display:grid; grid-template-columns:1fr 1fr; gap:18px; margin-bottom:26px; }
+  @media (max-width:820px){ .grid{ grid-template-columns:1fr; } }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:16px 18px; }
+  .card h3 { margin:0 0 12px; font-size:13px; color:var(--mut); text-transform:uppercase; letter-spacing:.04em; }
+  .bar { display:flex; align-items:center; gap:10px; margin:6px 0; font-size:13px; }
+  .bar .name { width:150px; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .bar .track { flex:1; background:#0c1024; border-radius:6px; overflow:hidden; height:14px; }
+  .bar .fill { height:100%; background:linear-gradient(90deg,var(--acc),var(--acc2)); }
+  .bar .v { width:34px; text-align:right; color:var(--mut); }
+  .filters { display:flex; flex-wrap:wrap; gap:12px; align-items:center; margin:8px 0 16px; }
+  select, input[type=text] { background:var(--card); color:var(--ink); border:1px solid var(--line); border-radius:8px; padding:8px 10px; font-size:13px; }
+  .chk { display:inline-flex; align-items:center; gap:6px; font-size:13px; color:var(--ink); cursor:pointer; user-select:none; }
+  table { width:100%; border-collapse:collapse; font-size:13px; }
+  th,td { text-align:left; padding:9px 10px; border-bottom:1px solid var(--line); vertical-align:top; }
+  th { color:var(--mut); font-weight:600; position:sticky; top:0; background:var(--card); }
+  .badge { display:inline-block; padding:1px 7px; border-radius:999px; font-size:10px; border:1px solid var(--line); margin-right:4px; }
+  .badge.ai { color:var(--acc); border-color:var(--acc); }
+  .badge.rt { color:var(--acc2); border-color:var(--acc2); }
+  .badge.off { color:#4b5272; }
+  .tag.r { color:var(--acc2); }
+  .uc { color:var(--ink); } .uc .lab { color:var(--mut); font-size:11px; }
+  a { color:var(--acc); text-decoration:none; }
+  .count { color:var(--mut); font-size:12px; margin-left:6px; }
+  .muted { color:var(--mut); }
+</style>
+</head>
+<body>
+<header>
+  <h1>AI &amp; Retail/Ecommerce Tech Tracker</h1>
+  <div class="sub">Product technology companies across <b>UK · Europe · Turkey · MENA</b> — any size. <b>AI</b> and <b>Retail/Ecommerce</b> are independent facets; a company can be in both.</div>
+</header>
+<div class="wrap">
+  <div class="kpis" id="kpis"></div>
+  <div class="grid">
+    <div class="card"><h3>By facet (overlapping)</h3><div id="chart-facet"></div></div>
+    <div class="card"><h3>By region</h3><div id="chart-region"></div></div>
+    <div class="card"><h3>By company size</h3><div id="chart-size"></div></div>
+    <div class="card"><h3>By sector</h3><div id="chart-sector"></div></div>
+  </div>
+  <div class="card">
+    <h3>Companies <span class="count" id="rowcount"></span></h3>
+    <div class="filters">
+      <select id="f-region"></select>
+      <label class="chk"><input type="checkbox" id="f-ai"/> AI</label>
+      <label class="chk"><input type="checkbox" id="f-retail"/> Retail/Ecommerce</label>
+      <select id="f-size"></select>
+      <select id="f-type"></select>
+      <input type="text" id="f-search" placeholder="Search name / use-case…"/>
+    </div>
+    <div style="max-height:560px; overflow:auto;">
+      <table>
+        <thead><tr><th>Company</th><th>Region</th><th>Facets</th><th>Size</th><th>Sector</th><th>Use-case(s)</th></tr></thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+  </div>
+  <p class="muted" style="margin-top:18px; font-size:12px;">Generated locally from Master.db · 19 companies.</p>
+</div>
+<script>
+const DATA = {"kpis": {"total": 19, "ai": 13, "retail": 14, "both": 8, "enterprises": 6}, "by_region": [{"label": "Europe", "count": 8}, {"label": "MENA", "count": 4}, {"label": "UK", "count": 4}, {"label": "Turkey", "count": 3}], "by_facet": [{"label": "AI", "count": 13}, {"label": "Retail/Ecommerce", "count": 14}, {"label": "Both (AI+Retail)", "count": 8}], "by_size": [{"label": "Scale-up", "count": 10}, {"label": "Enterprise", "count": 6}, {"label": "Startup", "count": 2}, {"label": "Unknown", "count": 1}], "by_sector": [{"label": "Services", "count": 15}, {"label": "Technology", "count": 2}, {"label": "Defense", "count": 1}, {"label": "Finance", "count": 1}], "by_type": [{"label": "Company", "count": 19}], "companies": [{"id": 5, "company_name": "Akeneo", "website": "akeneo.com", "description": "Akeneo develops product information management software to scale businesses and enhance customer experience.", "city": "France", "region": "Europe", "domain": "Retail/Ecommerce", "company_size": "Scale-up", "entity_type": "Company", "location_status": "established", "Category": "Services | E-commerce & Retail", "is_ai": 0, "AI_Use_Case": "product data intelligence for catalog management", "ai_explanation": "Akeneo develops product information management software to scale businesses and enhance customer experience.", "is_retail": 1, "retail_use_case": "", "retail_explanation": "", "tech_proximity": 40, "data_confidence": 85, "Status": "Active", "sector": "Services", "ai_use_case": "product data intelligence for catalog management"}, {"id": 3, "company_name": "Algolia", "website": "algolia.com", "description": "Algolia is an AI-powered search platform that enhances product discoverability and searching on e-commerce websites.", "city": "London", "region": "Europe", "domain": "AI+Retail", "company_size": "Scale-up", "entity_type": "Company", "location_status": "established", "Category": "Services | E-commerce & Retail", "is_ai": 1, "AI_Use_Case": "AI-powered search optimization", "ai_explanation": "Algolia uses AI to improve product discoverability and searching on e-commerce platforms.", "is_retail": 1, "retail_use_case": "E-commerce platform enhancement", "retail_explanation": "The company augments retail shopping experiences through advanced search capabilities.", "tech_proximity": 100, "data_confidence": 85, "Status": "Active", "sector": "Services", "ai_use_case": "AI-powered search optimization"}, {"id": 19, "company_name": "Alta Ares", "website": "https://www.altaares.com/blog-post/alta-ares-raises-eu50m-to-become-a-leading-european-player-in-air-defense", "description": "Alta Ares is a defense technology company specializing in air defense and edge artificial intelligence.", "city": "Paris", "region": "Europe", "domain": "AI", "company_size": "Unknown", "entity_type": "Company", "location_status": "established", "Category": "Defense | Unmanned Systems", "is_ai": 1, "AI_Use_Case": "edge ai for air defense and data fusion.", "ai_explanation": "Alta Ares is a defense technology company specializing in air defense and edge artificial intelligence.", "is_retail": 0, "retail_use_case": "", "retail_explanation": "", "tech_proximity": 80, "data_confidence": 85, "Status": "Active", "sector": "Defense", "ai_use_case": "edge ai for air defense and data fusion."}, {"id": 1, "company_name": "Contentsquare", "website": "contentsquare.com", "description": "An all-in-one experience intelligence platform that empowers businesses to understand and optimize user experiences across web, mobile, and app platforms.", "city": "London", "region": "Europe", "domain": "AI+Retail", "company_size": "Enterprise", "entity_type": "Company", "location_status": "established", "Category": "Technology | Digital Experience & Optimization", "is_ai": 1, "AI_Use_Case": "User experience optimization using AI", "ai_explanation": "Uses machine learning to analyze and improve user interactions across web, mobile, and app platforms.", "is_retail": 1, "retail_use_case": "Ecommerce site analytics and enhancement", "retail_explanation": "Provides insights for optimizing the shopping experience on ecommerce sites.", "tech_proximity": 80, "data_confidence": 85, "Status": "Active", "sector": "Technology", "ai_use_case": "User experience optimization using AI"}, {"id": 7, "company_name": "DeepL", "website": "deepl.com", "description": "DeepL is an AI-native translation platform offering real-time voice and text translations, serving over a million users.", "city": "London", "region": "Europe", "domain": "AI", "company_size": "Scale-up", "entity_type": "Company", "location_status": "established", "Category": "Services | Customer Experience", "is_ai": 1, "AI_Use_Case": "Real-time voice and text translation", "ai_explanation": "DeepL uses AI to provide instantaneous language translations for communication.", "is_retail": 0, "retail_use_case": "", "retail_explanation": "", "tech_proximity": 80, "data_confidence": 85, "Status": "Active", "sector": "Services", "ai_use_case": "Real-time voice and text translation"}, {"id": 14, "company_name": "Getir", "website": "getir.com", "description": "The provided text does not contain explicit information about the startup's services related to ultrafast grocery delivery and quick commerce.", "city": "Unknown", "region": "Turkey", "domain": "Retail/Ecommerce", "company_size": "Enterprise", "entity_type": "Company", "location_status": "established", "Category": "Services | E-commerce & Retail", "is_ai": 0, "AI_Use_Case": "ultrafast grocery delivery, quick commerce technology application", "ai_explanation": "The provided text does not contain explicit information about the startup's services related to ultrafast grocery delivery and quick commerce.", "is_retail": 1, "retail_use_case": "", "retail_explanation": "", "tech_proximity": 60, "data_confidence": 85, "Status": "Active", "sector": "Services", "ai_use_case": "ultrafast grocery delivery, quick commerce technology application"}, {"id": 12, "company_name": "Insider", "website": "useinsider.com", "description": "Insider is an AI-led customer experience and personalization platform for marketers.", "city": "London", "region": "Turkey", "domain": "AI+Retail", "company_size": "Scale-up", "entity_type": "Company", "location_status": "established", "Category": "Services | Customer Experience", "is_ai": 1, "AI_Use_Case": "Customer experience personalization", "ai_explanation": "Insider uses AI to tailor marketing experiences for customers based on their behavior and preferences.", "is_retail": 1, "retail_use_case": "Marketing platform optimization in retail/ecommerce", "retail_explanation": "Insider helps optimize ecommerce platforms by personalizing marketing strategies for better customer engagement.", "tech_proximity": 80, "data_confidence": 85, "Status": "Active", "sector": "Services", "ai_use_case": "Customer experience personalization"}, {"id": 4, "company_name": "Mirakl", "website": "mirakl.com", "description": "Mirakl is an AI-powered eCommerce solutions provider that operates as a marketplace and dropshipping platform for both B2B and B2C commerce.", "city": "London", "region": "Europe", "domain": "AI+Retail", "company_size": "Enterprise", "entity_type": "Company", "location_status": "established", "Category": "Services | Marketplace & Commerce Platforms", "is_ai": 1, "AI_Use_Case": "AI-powered eCommerce solutions", "ai_explanation": "Mirakl uses AI to enhance its marketplace and dropshipping platform for commerce transactions.", "is_retail": 1, "retail_use_case": "eCommerce marketplace with a focus on B2B/B2C", "retail_explanation": "Mirakl operates as an ecommerce solutions provider facilitating online sales and dropshipping for businesses.", "tech_proximity": 80, "data_confidence": 85, "Status": "Active", "sector": "Services", "ai_use_case": "AI-powered eCommerce solutions"}, {"id": 18, "company_name": "Mozn", "website": "mozn.ai", "description": "Mozn is an enterprise AI platform that enables organizations to make critical and informed decisions, focusing on Financial Crime Prevention and Enterprise Knowledge Intelligence.", "city": "London", "region": "MENA", "domain": "AI", "company_size": "Startup", "entity_type": "Company", "location_status": "established", "Category": "Finance | Fintech", "is_ai": 1, "AI_Use_Case": "ai fraud prevention, aml compliance platform", "ai_explanation": "Mozn is an enterprise AI platform that enables organizations to make critical and informed decisions, focusing on Financial Crime Prevention and Enterprise Knowledge Intelligence.", "is_retail": 0, "retail_use_case": "", "retail_explanation": "", "tech_proximity": 100, "data_confidence": 85, "Status": "Active", "sector": "Finance", "ai_use_case": "ai fraud prevention, aml compliance platform"}, {"id": 8, "company_name": "Ocado Technology", "website": "ocadogroup.com", "description": "Ocado Technology develops advanced robotics and automation software for online grocery retail.", "city": "London", "region": "UK", "domain": "AI+Retail", "company_size": "Enterprise", "entity_type": "Company", "location_status": "established", "Category": "Services | Supply Chain & Fulfillment", "is_ai": 1, "AI_Use_Case": "Automation software development", "ai_explanation": "Ocado Technology uses AI to create robotics and automation solutions for online grocery retail.", "is_retail": 1, "retail_use_case": "Online grocery delivery system", "retail_explanation": "The company develops systems that enable efficient online ordering and home delivery of groceries.", "tech_proximity": 80, "data_confidence": 85, "Status": "Active", "sector": "Services", "ai_use_case": "Automation software development"}, {"id": 2, "company_name": "Optimizely", "website": "optimizely.com", "description": "Optimizely is a platform that enables marketing and digital teams to conduct A/B testing, manage content strategies through CMS or SDKs for developers.", "city": "Unknown", "region": "Europe", "domain": "Retail/Ecommerce", "company_size": "Enterprise", "entity_type": "Company", "location_status": "established", "Category": "Technology | Digital Experience & Optimization", "is_ai": 0, "AI_Use_Case": "a/b testing and conversion optimization platform", "ai_explanation": "Optimizely is a platform that enables marketing and digital teams to conduct A/B testing, manage content strategies through CMS or SDKs for developers.", "is_retail": 1, "retail_use_case": "", "retail_explanation": "", "tech_proximity": 60, "data_confidence": 85, "Status": "Active", "sector": "Technology", "ai_use_case": "a/b testing and conversion optimization platform"}, {"id": 9, "company_name": "Peak", "website": "peak.ai", "description": "Peak is an AI-native company that specializes in optimizing product inventory and pricing for businesses of all sizes.", "city": "Manchester", "region": "UK", "domain": "AI", "company_size": "Scale-up", "entity_type": "Company", "location_status": "established", "Category": "Services | Supply Chain & Fulfillment", "is_ai": 1, "AI_Use_Case": "Optimizing product inventory and pricing using AI", "ai_explanation": "Peak employs artificial intelligence to enhance business operations by predicting demand and setting optimal prices for products.", "is_retail": 0, "retail_use_case": "", "retail_explanation": "", "tech_proximity": 80, "data_confidence": 85, "Status": "Active", "sector": "Services", "ai_use_case": "Optimizing product inventory and pricing using AI"}, {"id": 16, "company_name": "Salla", "website": "salla.sa", "description": "Salla is an online commerce platform that enables merchants to build and manage their e-commerce stores, offering products like skincare items, perfumes, and makeup.", "city": "İstanbul", "region": "MENA", "domain": "Retail/Ecommerce", "company_size": "Scale-up", "entity_type": "Company", "location_status": "established", "Category": "Services | Marketplace & Commerce Platforms", "is_ai": 0, "AI_Use_Case": "", "ai_explanation": "", "is_retail": 1, "retail_use_case": "Online commerce platform for merchants", "retail_explanation": "Enables building and managing e-commerce stores without AI integration.", "tech_proximity": 60, "data_confidence": 85, "Status": "Active", "sector": "Services", "ai_use_case": ""}, {"id": 6, "company_name": "Spryker", "website": "spryker.com", "description": "Spryker is an AI-powered headless commerce platform that integrates visual search and product translation features to enhance B2B shopping experiences.", "city": "London", "region": "Europe", "domain": "AI+Retail", "company_size": "Scale-up", "entity_type": "Company", "location_status": "established", "Category": "Services | E-commerce & Retail", "is_ai": 1, "AI_Use_Case": "enhancing e-commerce with visual search and product translation.", "ai_explanation": "Spryker is an AI-powered headless commerce platform that integrates visual search and product translation features to enhance B2B shopping experiences.", "is_retail": 1, "retail_use_case": "", "retail_explanation": "", "tech_proximity": 80, "data_confidence": 85, "Status": "Active", "sector": "Services", "ai_use_case": "enhancing e-commerce with visual search and product translation."}, {"id": 10, "company_name": "Synthesia", "website": "synthesia.io", "description": "Synthesia is an AI video platform that enables businesses to create studio-quality videos with synthetic avatars and voiceovers in multiple languages.", "city": "London", "region": "UK", "domain": "AI", "company_size": "Scale-up", "entity_type": "Company", "location_status": "established", "Category": "Services | Media & Entertainment", "is_ai": 1, "AI_Use_Case": "generating studio-quality videos with synthetic avatars and voiceovers in multiple languages.", "ai_explanation": "Synthesia is an AI video platform that enables businesses to create studio-quality videos with synthetic avatars and voiceovers in multiple languages.", "is_retail": 0, "retail_use_case": "", "retail_explanation": "", "tech_proximity": 80, "data_confidence": 85, "Status": "Active", "sector": "Services", "ai_use_case": "generating studio-quality videos with synthetic avatars and voiceovers in multiple languages."}, {"id": 11, "company_name": "THG Ingenuity", "website": "thgingenuity.com", "description": "THG Ingenuity is an end-to-end direct-to-consumer e-commerce platform and fulfillment service provider.", "city": "Manchester", "region": "UK", "domain": "AI+Retail", "company_size": "Enterprise", "entity_type": "Company", "location_status": "established", "Category": "Services | E-commerce & Retail", "is_ai": 1, "AI_Use_Case": "end-to0en commerce platform, fulfilment services provisioning.", "ai_explanation": "THG Ingenuity is an end-to-end direct-to-consumer e-commerce platform and fulfillment service provider.", "is_retail": 1, "retail_use_case": "", "retail_explanation": "", "tech_proximity": 100, "data_confidence": 85, "Status": "Active", "sector": "Services", "ai_use_case": "end-to0en commerce platform, fulfilment services provisioning."}, {"id": 17, "company_name": "Tabby", "website": "tabby.ai", "description": "Tabby is a Buy-now-pay-later checkout and shopping app for MENA, offering interest-free payment plans.", "city": "Dubai", "region": "MENA", "domain": "Retail/Ecommerce", "company_size": "Scale-up", "entity_type": "Company", "location_status": "established", "Category": "Services | Payments & Checkout", "is_ai": 0, "AI_Use_Case": "", "ai_explanation": "", "is_retail": 1, "retail_use_case": "Buy-now-pay-later checkout and shopping app", "retail_explanation": "Offers interest-free payment plans for retail purchases in the MENA region.", "tech_proximity": 60, "data_confidence": 85, "Status": "Active", "sector": "Services", "ai_use_case": ""}, {"id": 13, "company_name": "Vispera", "website": "vispera.co", "description": "Vispera leverages image recognition technology to enhance retail execution and tracking for grocery stores, aiming to boost operational efficiency.", "city": "London", "region": "Turkey", "domain": "AI+Retail", "company_size": "Startup", "entity_type": "Company", "location_status": "established", "Category": "Services | E-commerce & Retail", "is_ai": 1, "AI_Use_Case": "image recognition for retail field operations tracking.", "ai_explanation": "Vispera leverages image recognition technology to enhance retail execution and tracking for grocery stores, aiming to boost operational efficiency.", "is_retail": 1, "retail_use_case": "", "retail_explanation": "", "tech_proximity": 80, "data_confidence": 85, "Status": "Active", "sector": "Services", "ai_use_case": "image recognition for retail field operations tracking."}, {"id": 15, "company_name": "Zid", "website": "zid.sa", "description": "Zid is an eRetail enablement platform for merchants in Saudi Arabia and the Gulf, offering payment processing, inventory management, marketing tools.", "city": "Dubai", "region": "MENA", "domain": "Retail/Ecommerce", "company_size": "Scale-up", "entity_type": "Company", "location_status": "established", "Category": "Services | E-commerce & Retail", "is_ai": 0, "AI_Use_Case": "online merchandising and product recommendations", "ai_explanation": "Zid is an eRetail enablement platform for merchants in Saudi Arabia and the Gulf, offering payment processing, inventory management, marketing tools.", "is_retail": 1, "retail_use_case": "", "retail_explanation": "", "tech_proximity": 60, "data_confidence": 85, "Status": "Active", "sector": "Services", "ai_use_case": "online merchandising and product recommendations"}]};
+function chart(elId, items){
+  const max = Math.max(1, ...items.map(i=>i.count));
+  document.getElementById(elId).innerHTML = items.map(i=>
+    `<div class="bar"><div class="name">${i.label}</div>
+       <div class="track"><div class="fill" style="width:${Math.round(100*i.count/max)}%"></div></div>
+       <div class="v">${i.count}</div></div>`).join("");
+}
+function opts(sel, label, items){
+  const el = document.getElementById(sel);
+  const vals = [...new Set(items.map(i=>i.label))];
+  el.innerHTML = `<option value="">All ${label}</option>` + vals.map(v=>`<option>${v}</option>`).join("");
+}
+function kpiCard(n,l){ return `<div class="kpi"><div class="n">${n}</div><div class="l">${l}</div></div>`; }
+
+document.getElementById("kpis").innerHTML =
+  kpiCard(DATA.kpis.total,"Companies") + kpiCard(DATA.kpis.ai,"AI") +
+  kpiCard(DATA.kpis.retail,"Retail/Ecom") + kpiCard(DATA.kpis.both,"Both") +
+  kpiCard(DATA.kpis.enterprises,"Enterprises");
+chart("chart-facet", DATA.by_facet);
+chart("chart-region", DATA.by_region);
+chart("chart-size", DATA.by_size);
+chart("chart-sector", DATA.by_sector.slice(0,10));
+opts("f-region","regions",DATA.by_region);
+opts("f-size","sizes",DATA.by_size);
+opts("f-type","types",DATA.by_type);
+
+function val(id){ return document.getElementById(id).value; }
+function chk(id){ return document.getElementById(id).checked; }
+function facetCell(c){
+  const ai = c.is_ai ? '<span class="badge ai">AI</span>' : '<span class="badge off">ai</span>';
+  const rt = c.is_retail ? '<span class="badge rt">Retail</span>' : '<span class="badge off">retail</span>';
+  return ai + rt;
+}
+function ucCell(c){
+  let s = "";
+  if (c.is_ai && c.ai_use_case) s += `<div class="uc"><span class="lab">AI:</span> ${c.ai_use_case}</div>`;
+  if (c.is_retail && c.retail_use_case) s += `<div class="uc"><span class="lab">Retail:</span> ${c.retail_use_case}</div>`;
+  return s || `<span class="muted">${c.ai_explanation || c.retail_explanation || ""}</span>`;
+}
+function render(){
+  const r=val("f-region"), s=val("f-size"), t=val("f-type"),
+        wantAI=chk("f-ai"), wantRT=chk("f-retail"),
+        q=document.getElementById("f-search").value.toLowerCase();
+  const rows = DATA.companies.filter(c=>
+    (!r||c.region===r)&&(!s||c.company_size===s)&&(!t||c.entity_type===t)&&
+    (!wantAI||c.is_ai)&&(!wantRT||c.is_retail)&&
+    (!q||(c.company_name||"").toLowerCase().includes(q)
+        ||(c.ai_use_case||"").toLowerCase().includes(q)
+        ||(c.retail_use_case||"").toLowerCase().includes(q)));
+  document.getElementById("rowcount").textContent = rows.length + " shown";
+  document.getElementById("tbody").innerHTML = rows.map(c=>{
+    const site = c.website ? `<a href="${c.website.startsWith('http')?c.website:'https://'+c.website}" target="_blank">${c.company_name}</a>` : c.company_name;
+    return `<tr><td>${site}</td><td><span class="tag r">${c.region||'—'}</span></td>
+      <td>${facetCell(c)}</td><td>${c.company_size||'—'}</td>
+      <td>${c.sector||'—'}</td><td>${ucCell(c)}</td></tr>`;
+  }).join("");
+}
+["f-region","f-size","f-type"].forEach(id=>document.getElementById(id).onchange=render);
+["f-ai","f-retail"].forEach(id=>document.getElementById(id).onchange=render);
+document.getElementById("f-search").oninput=render;
+render();
+</script>
+</body>
+</html>
